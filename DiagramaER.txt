@@ -6,19 +6,19 @@ Table Usuarios {
 }
 
 Table Permisos {
-  nombreUsuario VARCHAR(100) [pk, ref: < Usuarios.nombre ]
-  idRepositorio VARCHAR(100) [pk, ref: < Repositorios.id ]
+  nombreUsuario VARCHAR(100) [pk, ref: > Usuarios.nombre ]
+  idRepositorio VARCHAR(100) [pk, ref: > Repositorios.id ]
 }
 
 Table Repositorios {
-  id VARCHAR(100)
+  id VARCHAR(100) [pk]
   ruta VARCHAR(100)
   descripcion VARCHAR(100)
   publico BOOLEAN
-  idProyecto VARCHAR(100) [ ref: < Proyectos.id]
+  idProyecto VARCHAR(100) [ ref: > Proyectos.id]
 }
 
 Table Proyectos {
-  id VARCHAR(100)
+  id VARCHAR(100) [pk]
   nombre VARCHAR(100)
 }
