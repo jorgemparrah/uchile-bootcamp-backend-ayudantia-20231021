@@ -1,0 +1,24 @@
+Table Usuarios {
+  nombre VARCHAR(100) [pk]
+  clave VARCHAR(100)
+  correo VARCHAR(100)
+  nombre_mostrar VARCHAR(100)
+}
+
+Table Permisos {
+  nombreUsuario VARCHAR(100) [pk, ref: < Usuarios.nombre ]
+  idRepositorio VARCHAR(100) [pk, ref: < Repositorios.id ]
+}
+
+Table Repositorios {
+  id VARCHAR(100)
+  ruta VARCHAR(100)
+  descripcion VARCHAR(100)
+  publico BOOLEAN
+  idProyecto VARCHAR(100) [ ref: < Proyectos.id]
+}
+
+Table Proyectos {
+  id VARCHAR(100)
+  nombre VARCHAR(100)
+}
