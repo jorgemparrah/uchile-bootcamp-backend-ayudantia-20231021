@@ -1,6 +1,7 @@
 import { CreateProyectoDto } from "../dto/create-proyecto.dto";
 import { ProyectoDto } from "../dto/proyecto.dto";
 import { Proyecto } from "../entities/proyecto.entity";
+import { RepositorioMapper } from "./repositorio.mapper";
 
 export class ProyectoMapper {
 
@@ -15,7 +16,14 @@ export class ProyectoMapper {
     const dto = new ProyectoDto();
     dto.id = entidad.id;
     dto.nombre = entidad.nombre;
+    if (entidad.repositorios) {
+      dto.repositorios = RepositorioMapper.toDtoList(entidad.repositorios);
+    }
     return dto;
+  }
+
+  static toDtoList(entidades: Proyecto[]): ProyectoDto[] {
+    return entidades.map(entidad => this.toDto(entidad));
   }
 
 }

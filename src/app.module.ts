@@ -2,8 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsuarioModule } from './usuario/usuario.module';
 import { Usuario } from './usuario/entities/usuario.entity';
-import { ProyectoModule } from './proyecto/proyecto.module';
-import { Proyecto } from './proyecto/entities/proyecto.entity';
+import { Proyecto } from './repositorio/entities/proyecto.entity';
 import { RepositorioModule } from './repositorio/repositorio.module';
 import { Repositorio } from './repositorio/entities/repositorio.entity';
 
@@ -23,7 +22,6 @@ import { Repositorio } from './repositorio/entities/repositorio.entity';
       ]
     }),
     UsuarioModule,
-    ProyectoModule,
     RepositorioModule
   ],
   controllers: [],

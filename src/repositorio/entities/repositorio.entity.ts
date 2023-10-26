@@ -1,4 +1,4 @@
-import { Proyecto } from "src/proyecto/entities/proyecto.entity";
+import { Proyecto } from "src/repositorio/entities/proyecto.entity";
 import { Usuario } from "src/usuario/entities/usuario.entity";
 import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, PrimaryColumn } from "typeorm";
 
