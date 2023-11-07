@@ -1,31 +1,33 @@
 import { Injectable } from '@nestjs/common';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, MongoEntityManager, MongoRepository, Repository } from 'typeorm';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { UsuarioDto } from './dto/usuario.dto';
-import { Repository } from 'typeorm';
 import { Usuario } from './entities/usuario.entity';
-import { InjectRepository } from '@nestjs/typeorm';
 import { UsuarioMapper } from './mapper/Usuario.mapper';
 
 @Injectable()
 export class UsuarioService {
 
   constructor(
+    @InjectDataSource()
+    private dataSource: DataSource,
     @InjectRepository(Usuario)
-    private usuarioRepository: Repository<Usuario>
+    private usuarioRepository: MongoRepository<Usuario>
   ) {}
 
   async create(createUsuarioDto: CreateUsuarioDto): Promise<UsuarioDto> {
-    const existe: boolean = await this.usuarioRepository.exist({
-      where: {
-        nombre: createUsuarioDto.nombre
-      }
+    const em : MongoEntityManager = this.dataSource.mongoManager;
+    const repoUsuario = em.getMongoRepository(Usuario);
+    const cantidad: number = await repoUsuario.countBy({
+      nombre: createUsuarioDto.nombre
     });
-    if (existe) {
+    if (cantidad > 0) {
       throw Error("Ya existe un usuario con ese nombre");
     }
     const entidad : Usuario = UsuarioMapper.toEntity(createUsuarioDto);
-    const resultado: Usuario = await this.usuarioRepository.save(entidad);
+    const resultado: Usuario = await repoUsuario.save(entidad);
     return UsuarioMapper.toDto(resultado);
   }
 
@@ -35,12 +37,10 @@ export class UsuarioService {
   }
 
   async findOne(nombre: string): Promise<UsuarioDto> {
-    const existe: boolean = await this.usuarioRepository.exist({
-      where: {
-        nombre: nombre
-      }
+    const cantidad: number = await this.usuarioRepository.countBy({
+      nombre: nombre
     });
-    if (!existe) {
+    if (cantidad == 0) {
       throw Error("No se encontró el usuario");
     }
     const resultado: Usuario = await this.usuarioRepository.findOne({
@@ -52,10 +52,8 @@ export class UsuarioService {
   }
 
   async update(nombre: string, updateUsuarioDto: UpdateUsuarioDto): Promise<UsuarioDto> {
-    const encontrado: Usuario = await this.usuarioRepository.findOne({
-      where: {
-        nombre: nombre
-      }
+    const encontrado: Usuario = await this.usuarioRepository.findOneBy({
+      nombre: nombre
     });
     if (!encontrado) {
       throw Error("No se encontró el usuario");
@@ -83,7 +81,9 @@ export class UsuarioService {
     if (!encontrado) {
       throw Error("No se encontró el usuario");
     }
-    await this.usuarioRepository.remove(encontrado);
+    await this.usuarioRepository.deleteOne({
+      nombre: nombre
+    });
     return UsuarioMapper.toDto(encontrado);
   }
 }

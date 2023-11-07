@@ -12,4 +12,7 @@ export class ProyectoDto {
   @ApiProperty({ description: "Lista de repositorios del proyecto" })
   repositorios: RepositorioDto[];
 
+  @ApiProperty({ description: "Cantidad de repositorios del proyecto" })
+  cantidad: number;
+
 }

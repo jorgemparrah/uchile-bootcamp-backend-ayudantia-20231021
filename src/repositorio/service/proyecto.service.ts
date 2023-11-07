@@ -1,27 +1,30 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, MongoEntityManager, MongoRepository, Repository } from 'typeorm';
 import { CreateProyectoDto } from '../dto/create-proyecto.dto';
 import { ProyectoDto } from '../dto/proyecto.dto';
 import { UpdateProyectoDto } from '../dto/update-proyecto.dto';
 import { Proyecto } from '../entities/proyecto.entity';
 import { ProyectoMapper } from '../mapper/proyecto.mapper';
+import { Repositorio } from '../entities/repositorio.entity';
 
 @Injectable()
 export class ProyectoService {
 
   constructor(
+    @InjectDataSource()
+    private dataSource: DataSource,
     @InjectRepository(Proyecto)
-    private proyectoRepository: Repository<Proyecto>
+    private proyectoRepository: MongoRepository<Proyecto>
   ) {}
 
   async create(createProyectoDto: CreateProyectoDto): Promise<ProyectoDto> {
-    const encontrado : boolean = await this.proyectoRepository.exist({
+    const cantidad : number = await this.proyectoRepository.count({
       where: {
-        id: createProyectoDto.id
+        idProyecto: createProyectoDto.id
       }
     });
-    if (encontrado) {
+    if (cantidad > 0) {
       throw Error("Ya existe un proyecto con ese id");
     }
     const entidad : Proyecto = ProyectoMapper.toEntity(createProyectoDto);
@@ -30,21 +33,22 @@ export class ProyectoService {
   }
 
   async findAll(): Promise<ProyectoDto[]> {
+    const contadores = await this.consultarNumeroDeRepositorios();
     const resultado : Proyecto[] = await this.proyectoRepository.find({
-      relations: {
-        repositorios: true
-      }
     });
-    return ProyectoMapper.toDtoList(resultado);
+    const dtos = ProyectoMapper.toDtoList(resultado);
+    const x = dtos.map(dto => {
+      dto.cantidad = contadores.filter(x => x["_id"])[0].contador;
+      return dto;
+    });
+    console.log(x);
+    return x;
   }
 
   async findOne(id: string): Promise<ProyectoDto> {
     const resultado : Proyecto = await this.proyectoRepository.findOne({
       where: {
-        id: id
-      },
-      relations: {
-        repositorios: true
+        idProyecto: id
       }
     });
     if (!resultado) {
@@ -56,7 +60,7 @@ export class ProyectoService {
   async update(id: string, updateProyectoDto: UpdateProyectoDto): Promise<ProyectoDto> {
     const encontrado: Proyecto = await this.proyectoRepository.findOne({
       where: {
-        id: id
+        idProyecto: id
       }
     });
     if (!encontrado) {
@@ -73,13 +77,28 @@ export class ProyectoService {
   async remove(id: string): Promise<ProyectoDto> {
     const encontrado: Proyecto = await this.proyectoRepository.findOne({
       where: {
-        id: id
+        idProyecto: id
       }
     });
     if (!encontrado) {
       throw Error("No se encontró el proyecto");
     }
-    await this.proyectoRepository.remove(encontrado);
+    await this.proyectoRepository.deleteOne({
+      idProyecto: id
+    });
     return ProyectoMapper.toDto(encontrado);
+  }
+
+  private async consultarNumeroDeRepositorios() {
+    const em : MongoEntityManager = this.dataSource.mongoManager;
+    const resultado = await em.aggregate(Repositorio, [{
+      $group: {
+        _id: "$idProyecto",
+        contador: {
+          $count: {}
+        }
+      }
+    }]).toArray();
+    return resultado;
   }
 }

@@ -9,10 +9,10 @@ import { Repositorio } from './repositorio/entities/repositorio.entity';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
-      type: 'mysql',
+      type: 'mongodb',
       host: 'localhost', // 127.0.0.1
-      port: 3306,
-      username: 'root',
+      port: 27017,
+      username: 'mongo',
       password: 'clave123',
       database: 'GIT',
       entities: [

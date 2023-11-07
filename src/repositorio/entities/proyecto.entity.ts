@@ -1,17 +1,17 @@
-import { Repositorio } from "src/repositorio/entities/repositorio.entity";
-import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
+import { ObjectId } from "mongodb";
+import { Column, Entity, ObjectIdColumn } from "typeorm";
 
 @Entity({ name: 'Proyectos'})
 export class Proyecto {
 
-  @PrimaryColumn({ name: 'id' })
-  id: string;
+  @ObjectIdColumn()
+  id: ObjectId;
+
+  @Column({ name: 'idProyecto' })
+  idProyecto: string;
 
   @Column({ name: 'nombre' })
   nombre: string;
-
-  @OneToMany(() => Repositorio, (repo) => repo.proyecto) // LISTA DE REPOSITORIOS QUE TIENE ESTE PROYECTO
-  repositorios: Repositorio[];
 
 }
 

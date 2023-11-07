@@ -1,9 +1,13 @@
-import { Column, Entity, PrimaryColumn } from "typeorm";
+import { ObjectId } from "mongodb";
+import { Column, Entity, ObjectIdColumn, PrimaryColumn } from "typeorm";
 
 @Entity({ name: 'Usuarios'})
 export class Usuario {
 
-  @PrimaryColumn({ name: 'nombre' })
+  @ObjectIdColumn()
+  id: ObjectId;
+
+  @Column({ name: 'nombre' })
   nombre: string;
 
   @Column({ name: 'clave' })

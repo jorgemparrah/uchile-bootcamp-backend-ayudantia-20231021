@@ -1,12 +1,15 @@
-import { Proyecto } from "src/repositorio/entities/proyecto.entity";
+import { ObjectId } from "mongodb";
 import { Usuario } from "src/usuario/entities/usuario.entity";
-import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, PrimaryColumn } from "typeorm";
+import { Column, Entity, ObjectIdColumn } from "typeorm";
 
 @Entity({ name: 'Repositorios'})
 export class Repositorio {
 
-  @PrimaryColumn({ name: 'id' })
-  id: string;
+  @ObjectIdColumn({ name: '_id' })
+  _id: ObjectId;
+
+  @Column({ name: 'idRepositorio' })
+  idRepositorio: string;
 
   @Column({ name: 'ruta' })
   ruta: string;
@@ -20,8 +23,7 @@ export class Repositorio {
   @Column({ name: 'idProyecto' })
   idProyecto: string;
 
-  @ManyToOne(() => Proyecto) // A QUE PROYECTO PERTENECE ESTE REPOSITORIO
-  @JoinColumn({ name: 'idProyecto' })
-  proyecto: Proyecto;
+  @Column( (type) => Usuario )
+  usuarios: Usuario[];
 
 }
