@@ -1,51 +1,40 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { CreateProyectoDto } from '../dto/create-proyecto.dto';
 import { ProyectoDto } from '../dto/proyecto.dto';
 import { UpdateProyectoDto } from '../dto/update-proyecto.dto';
-import { Proyecto } from '../entities/proyecto.entity';
 import { ProyectoMapper } from '../mapper/proyecto.mapper';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Proyecto } from '../schemas/proyecto.schema';
 
 @Injectable()
 export class ProyectoService {
 
   constructor(
-    @InjectRepository(Proyecto)
-    private proyectoRepository: Repository<Proyecto>
+    @InjectModel(Proyecto.name)
+    private proyectoModel: Model<Proyecto>
   ) {}
 
   async create(createProyectoDto: CreateProyectoDto): Promise<ProyectoDto> {
-    const encontrado : boolean = await this.proyectoRepository.exist({
-      where: {
-        id: createProyectoDto.id
-      }
+    const existente : Proyecto = await this.proyectoModel.findOne({
+      id: createProyectoDto.id
     });
-    if (encontrado) {
+    if (existente) {
       throw Error("Ya existe un proyecto con ese id");
     }
-    const entidad : Proyecto = ProyectoMapper.toEntity(createProyectoDto);
-    const resultado : Proyecto = await this.proyectoRepository.save(entidad);
+    const entidad : Proyecto = ProyectoMapper.toSchema(createProyectoDto);
+    const resultado : Proyecto = await this.proyectoModel.create(entidad);
     return ProyectoMapper.toDto(resultado);
   }
 
   async findAll(): Promise<ProyectoDto[]> {
-    const resultado : Proyecto[] = await this.proyectoRepository.find({
-      relations: {
-        repositorios: true
-      }
-    });
+    const resultado : Proyecto[] = await this.proyectoModel.find();
     return ProyectoMapper.toDtoList(resultado);
   }
 
   async findOne(id: string): Promise<ProyectoDto> {
-    const resultado : Proyecto = await this.proyectoRepository.findOne({
-      where: {
-        id: id
-      },
-      relations: {
-        repositorios: true
-      }
+    const resultado : Proyecto = await this.proyectoModel.findOne({
+      id: id
     });
     if (!resultado) {
       throw Error("No se encontró el proyecto");
@@ -54,10 +43,8 @@ export class ProyectoService {
   }
 
   async update(id: string, updateProyectoDto: UpdateProyectoDto): Promise<ProyectoDto> {
-    const encontrado: Proyecto = await this.proyectoRepository.findOne({
-      where: {
-        id: id
-      }
+    const encontrado: Proyecto = await this.proyectoModel.findOne({
+      id: id
     });
     if (!encontrado) {
       throw Error("No se encontró el proyecto");
@@ -66,20 +53,27 @@ export class ProyectoService {
       encontrado.nombre = updateProyectoDto.nombre;
     }
 
-    const resultado: Proyecto = await this.proyectoRepository.save(encontrado);
-    return ProyectoMapper.toDto(resultado);
+    const resultado: any = await this.proyectoModel.updateOne({
+      id: id
+    }, encontrado);
+    console.log(resultado);
+
+    const proyectoActualizado: Proyecto = await this.proyectoModel.findOne({
+      id: id
+    });
+    return ProyectoMapper.toDto(proyectoActualizado);
   }
 
   async remove(id: string): Promise<ProyectoDto> {
-    const encontrado: Proyecto = await this.proyectoRepository.findOne({
-      where: {
-        id: id
-      }
+    const encontrado: Proyecto = await this.proyectoModel.findOne({
+      id: id
     });
     if (!encontrado) {
       throw Error("No se encontró el proyecto");
     }
-    await this.proyectoRepository.remove(encontrado);
+    await this.proyectoModel.deleteOne({
+      id: id
+    });
     return ProyectoMapper.toDto(encontrado);
   }
 }

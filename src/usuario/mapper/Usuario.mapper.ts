@@ -1,6 +1,6 @@
 import { CreateUsuarioDto } from "../dto/create-usuario.dto";
 import { UsuarioDto } from "../dto/usuario.dto";
-import { Usuario } from "../entities/usuario.entity";
+import { Usuario } from "../schemas/usuario.schema";
 
 export class UsuarioMapper {
 
@@ -16,7 +16,7 @@ export class UsuarioMapper {
     return entidades.map((entidad) => this.toDto(entidad));
   }
 
-  static toEntity(dto: CreateUsuarioDto): Usuario {
+  static toSchema(dto: CreateUsuarioDto): Usuario {
     const entidad = new Usuario();
     entidad.nombre = dto.nombre;
     entidad.correo = dto.correo;

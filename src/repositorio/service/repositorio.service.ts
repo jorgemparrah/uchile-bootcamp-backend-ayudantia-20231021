@@ -1,72 +1,56 @@
 import { Injectable } from '@nestjs/common';
 import { CreateRepositorioDto } from '../dto/create-repositorio.dto';
 import { UpdateRepositorioDto } from '../dto/update-repositorio.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repositorio } from '../entities/repositorio.entity';
-import { Repository } from 'typeorm';
 import { RepositorioDto } from '../dto/repositorio.dto';
 import { RepositorioMapper } from '../mapper/repositorio.mapper';
-import { Proyecto } from '../entities/proyecto.entity';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Proyecto } from '../schemas/proyecto.schema';
+import { Repositorio } from '../schemas/repositorio.schema';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class RepositorioService {
 
   constructor(
-    @InjectRepository(Repositorio)
-    private repositorioRepository: Repository<Repositorio>,
-    @InjectRepository(Proyecto)
-    private proyectoRepository: Repository<Proyecto>
+    @InjectModel(Proyecto.name)
+    private proyectoModel: Model<Proyecto>,
+    @InjectModel(Repositorio.name)
+    private repositorioModel: Model<Repositorio>
   ) {}
 
   async create(createRepositorioDto: CreateRepositorioDto): Promise<RepositorioDto> {
-    const encontrado : boolean = await this.repositorioRepository.exist({
-      where: {
-        id: createRepositorioDto.id
-      }
+    const existente : Repositorio = await this.repositorioModel.findOne({
+      id: createRepositorioDto.id
     });
-    if (encontrado) {
+    if (existente) {
       throw Error("Ya existe un repositorio con ese id");
     }
     if (createRepositorioDto.idProyecto) {
-      const existeProyecto = await this.proyectoRepository.exist({
-        where: {
-          id: createRepositorioDto.idProyecto
-        }
+      const proyectoExistente : Proyecto = await this.proyectoModel.findOne({
+        _id: new ObjectId(createRepositorioDto.idProyecto)
       });
-      if (!existeProyecto) {
+      console.log(proyectoExistente);
+      if (!proyectoExistente) {
         throw Error("No existe el proyecto");
       }
     }
 
-    const entidad : Repositorio = RepositorioMapper.toEntity(createRepositorioDto);
-    const resultado : Repositorio = await this.repositorioRepository.save(entidad);
+    const entidad : Repositorio = RepositorioMapper.toSchema(createRepositorioDto);
+    const resultado : Repositorio = await this.repositorioModel.create(entidad);
     return RepositorioMapper.toDto(resultado);
   }
 
   async findAll(): Promise<RepositorioDto[]> {
-    const resultado : Repositorio[] = await this.repositorioRepository.find({
-      relations: {
-        proyecto: true
-      },
-      select: {
-        idProyecto: false,
-      }
-    });
+    const resultado : Repositorio[] = await this.repositorioModel.find();
     return RepositorioMapper.toDtoList(resultado);
   }
 
   async findOne(id: string): Promise<RepositorioDto> {
-    const resultado : Repositorio = await this.repositorioRepository.findOne({
-      where: {
-        id: id
-      },
-      select: {
-        idProyecto: false,
-      },
-      relations: {
-        proyecto: true
-      }
+    const resultado : Repositorio = await this.repositorioModel.findOne({
+      id: id
     });
+    console.log(resultado);
     if (!resultado) {
       throw Error("No se encontró el repositorio");
     }
@@ -74,10 +58,8 @@ export class RepositorioService {
   }
 
   async update(id: string, updateRepositorioDto: UpdateRepositorioDto): Promise<RepositorioDto> {
-    const encontrado: Repositorio = await this.repositorioRepository.findOne({
-      where: {
-        id: id
-      }
+    const encontrado: Repositorio = await this.repositorioModel.findOne({
+      id: id
     });
     if (!encontrado) {
       throw Error("No se encontró el repositorio");
@@ -86,7 +68,7 @@ export class RepositorioService {
       encontrado.descripcion = updateRepositorioDto.descripcion;
     }
     if (updateRepositorioDto.idProyecto) {
-      encontrado.idProyecto = updateRepositorioDto.idProyecto;
+      encontrado.idProyecto = new ObjectId(updateRepositorioDto.idProyecto);
     }
     if (updateRepositorioDto.publico) {
       encontrado.publico = updateRepositorioDto.publico;
@@ -95,20 +77,27 @@ export class RepositorioService {
       encontrado.ruta = updateRepositorioDto.ruta;
     }
 
-    const resultado: Repositorio = await this.repositorioRepository.save(encontrado);
-    return RepositorioMapper.toDto(resultado);
+    const resultado: any = await this.repositorioModel.updateOne({
+      id: id
+    }, encontrado);
+    console.log(resultado);
+
+    const repositorioActualizado: Repositorio = await this.repositorioModel.findOne({
+      id: id
+    });
+    return RepositorioMapper.toDto(repositorioActualizado);
   }
 
   async remove(id: string): Promise<RepositorioDto> {
-    const encontrado: Repositorio = await this.repositorioRepository.findOne({
-      where: {
-        id: id
-      }
+    const encontrado: Repositorio = await this.repositorioModel.findOne({
+      id: id
     });
     if (!encontrado) {
       throw Error("No se encontró el repositorio");
     }
-    await this.repositorioRepository.remove(encontrado);
+    await this.repositorioModel.deleteOne({
+      id: id
+    });
     return RepositorioMapper.toDto(encontrado);
   }
 }

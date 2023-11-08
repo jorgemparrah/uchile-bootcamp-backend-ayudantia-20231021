@@ -1,26 +1,11 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { UsuarioModule } from './usuario/usuario.module';
-import { Usuario } from './usuario/entities/usuario.entity';
-import { Proyecto } from './repositorio/entities/proyecto.entity';
+import { MongooseModule } from '@nestjs/mongoose';
 import { RepositorioModule } from './repositorio/repositorio.module';
-import { Repositorio } from './repositorio/entities/repositorio.entity';
+import { UsuarioModule } from './usuario/usuario.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: 'localhost', // 127.0.0.1
-      port: 3306,
-      username: 'root',
-      password: 'clave123',
-      database: 'GIT',
-      entities: [
-        Usuario,
-        Proyecto,
-        Repositorio
-      ]
-    }),
+    MongooseModule.forRoot('mongodb://mongo:clave123@localhost:27017/GIT_MONGOOSE'),
     UsuarioModule,
     RepositorioModule
   ],
@@ -28,3 +13,4 @@ import { Repositorio } from './repositorio/entities/repositorio.entity';
   providers: [],
 })
 export class AppModule {}
+

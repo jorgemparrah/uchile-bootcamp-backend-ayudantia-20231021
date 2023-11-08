@@ -1,11 +1,11 @@
 import { CreateProyectoDto } from "../dto/create-proyecto.dto";
 import { ProyectoDto } from "../dto/proyecto.dto";
-import { Proyecto } from "../entities/proyecto.entity";
+import { Proyecto } from "../schemas/proyecto.schema";
 import { RepositorioMapper } from "./repositorio.mapper";
 
 export class ProyectoMapper {
 
-  static toEntity(dto: CreateProyectoDto) : Proyecto {
+  static toSchema(dto: CreateProyectoDto) : Proyecto {
     const entidad : Proyecto = new Proyecto();
     entidad.id = dto.id;
     entidad.nombre = dto.nombre;
