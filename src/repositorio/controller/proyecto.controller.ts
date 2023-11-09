@@ -31,6 +31,17 @@ export class ProyectoController {
     return resultado;
   }
 
+  @Get('consulta')
+  async consulta() {
+    try {
+      const resultado = await this.proyectoService.consulta();
+      return resultado;
+    } catch (error) {
+      console.log(error);
+      throw new NotFoundException(error.message);
+    }
+  }
+
   @Get(':id')
   @ApiOkResponse({ description: "Proyecto encontrado", type: ProyectoDto })
   @ApiNotFoundResponse({ description: "No se encontró el usuario" })
@@ -67,4 +78,6 @@ export class ProyectoController {
       throw new NotFoundException(error.message);
     }
   }
+
+ 
 }

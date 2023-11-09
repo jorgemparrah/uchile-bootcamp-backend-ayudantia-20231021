@@ -3,6 +3,7 @@ import { CreateRepositorioDto } from "../dto/create-repositorio.dto";
 import { RepositorioDto } from "../dto/repositorio.dto";
 import { Repositorio } from "../schemas/repositorio.schema";
 import { ProyectoMapper } from "./proyecto.mapper";
+import { Proyecto } from "../schemas/proyecto.schema";
 
 export class RepositorioMapper {
 
@@ -22,9 +23,11 @@ export class RepositorioMapper {
     dto.descripcion = entidad.descripcion;
     dto.ruta = entidad.ruta;
     dto.publico = entidad.publico;
-    dto.idProyecto = entidad.idProyecto.toString();
-    if (entidad.proyecto) {
-      dto.proyecto = ProyectoMapper.toDto(entidad.proyecto);
+    if (entidad.idProyecto instanceof ObjectId){
+      dto.idProyecto = entidad.idProyecto.toString();
+    } else {
+      dto.proyecto = ProyectoMapper.toDto(entidad.idProyecto);
+      dto.idProyecto = entidad.idProyecto["_id"].toString();
     }
     return dto;
   }

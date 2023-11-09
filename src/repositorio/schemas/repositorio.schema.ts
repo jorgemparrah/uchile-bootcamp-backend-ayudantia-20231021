@@ -17,11 +17,8 @@ export class Repositorio {
   @Prop({ name: 'publico' })
   publico: boolean;
 
-  @Prop({ name: 'idProyecto' })
-  idProyecto: ObjectId;
-
   @Prop({ type: ObjectId, ref: 'Proyecto' })
-  proyecto: Proyecto;
+  idProyecto: Proyecto | ObjectId;
 
 }
 

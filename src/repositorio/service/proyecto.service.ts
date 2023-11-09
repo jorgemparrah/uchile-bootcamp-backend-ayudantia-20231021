@@ -76,4 +76,35 @@ export class ProyectoService {
     });
     return ProyectoMapper.toDto(encontrado);
   }
+
+  async consulta() {
+    console.log("CONSULTA");
+    const resultado = await this.proyectoModel.aggregate([
+      {
+        $lookup: {
+          from: "Repositorios",
+          localField: "_id",
+          foreignField: "idProyecto",
+          as: "listaRepos",
+        },
+      },
+      {
+        $sort: {
+          nombre: 1,
+        },
+      },
+      {
+        $project: {
+          id: 1,
+          nombre: 1,
+          "listaRepos.id": 1,
+          "listaRepos.ruta": 1,
+          "listaRepos.descripcion": 1,
+          "listaRepos.publico": 1,
+        },
+      }
+    ]);
+    console.log(resultado);
+    return resultado;
+  }
 }

@@ -42,7 +42,9 @@ export class RepositorioService {
   }
 
   async findAll(): Promise<RepositorioDto[]> {
+    // const resultado : Repositorio[] = await this.repositorioModel.find().populate('idProyecto');
     const resultado : Repositorio[] = await this.repositorioModel.find();
+    console.log(resultado);
     return RepositorioMapper.toDtoList(resultado);
   }
 
