@@ -1,9 +1,9 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { ObjectId } from 'mongodb';
 import { Repositorio } from "./repositorio.schema";
-import mongoose, { Document } from "mongoose";
 
 @Schema({ collection: 'Proyectos'})
-export class Proyecto extends Document {
+export class Proyecto {
 
   @Prop({ name: 'id' })
   id: string;
@@ -11,7 +11,7 @@ export class Proyecto extends Document {
   @Prop({ name: 'nombre' })
   nombre: string;
 
-  @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'Repositorio' })
+  @Prop({ type: [ObjectId], ref: 'Repositorio' })
   repositorios: Repositorio[];
 
 }
